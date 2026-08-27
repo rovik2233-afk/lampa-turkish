@@ -16,10 +16,9 @@
       btn.className = 'full-start__button selector turkish-test-button';
       btn.innerHTML = '🇹🇷 Türkçe';
 
-      btn.onclick = function () {
-        Lampa.Noty.show('Türkçe çalışıyor');
-      };
-
+      $(btn).on('hover:enter', function () {
+  Lampa.Noty.show('Türkçe çalışıyor');
+});
       box.appendChild(btn);
     }, 1000);
   }
