@@ -29,47 +29,54 @@
         window.open(url, '_blank');
       }
     } catch (e) {
-      window.location.href = url;
+      Lampa.Noty.show('Не удалось открыть');
     }
   }
 
-  function addButton(e) {
-    try {
-      var root = e.object.activity.render();
+  function addButton(movie) {
+    var btn = document.createElement('div');
+    btn.className = 'full-start__button selector tr-bridge';
+    btn.innerHTML = '🇹🇷 Türkçe';
 
-      if (root.find('.turkish-france-button').length) return;
+    btn.addEventListener('click', function () {
+      openTurkish(movie);
+    });
 
-      var box = root.find('.full-start-new__buttons');
+    btn.addEventListener('hover:enter', function () {
+      openTurkish(movie);
+    });
 
-      if (!box.length) {
-        box = root.find('.full-start__buttons');
-      }
-
-      if (!box.length) return;
-
-      var button = $(
-        '<div class="full-start__button selector turkish-france-button">' +
-          '<span>🇹🇷 Türkçe</span>' +
-        '</div>'
+    var timer = setInterval(function () {
+      var box = document.querySelector(
+        '.full-start-new__buttons,.full-start__buttons'
       );
 
-      button.on('hover:enter', function () {
-        openTurkish(e.data.movie);
-      });
-
-      button.on('click', function () {
-        openTurkish(e.data.movie);
-      });
-
-      box.append(button);
-
-    } catch (err) {
-      console.log('[Türkçe France]', err);
-    }
+      if (box && !box.querySelector('.tr-bridge')) {
+        box.appendChild(btn);
+        clearInterval(timer);
+      }
+    }, 500);
   }
 
   function start() {
     Lampa.Listener.follow('full', function (e) {
       if (e.type === 'complite' && e.data && e.data.movie) {
         setTimeout(function () {
-          addButton
+          addButton(e.data.movie);
+        }, 300);
+      }
+    });
+
+    Lampa.Noty.show('🇹🇷 Türkçe plugin hazır');
+  }
+
+  if (window.appready) {
+    start();
+  } else {
+    Lampa.Listener.follow('app', function (e) {
+      if (e.type === 'ready') {
+        start();
+      }
+    });
+  }
+})();
