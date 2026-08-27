@@ -1,33 +1,44 @@
 (function () {
   'use strict';
 
-  function start() {
-    Lampa.Noty.show('🇹🇷 Türkçe plugin hazır');
+  if (window.turkish_button_ready) return;
+  window.turkish_button_ready = true;
 
-    var timer = setInterval(function () {
-      var box = document.querySelector(
-        '.full-start-new__buttons, .full-start__buttons'
+  function startPlugin() {
+    Lampa.Listener.follow('full', function (e) {
+      if (e.type !== 'complite') return;
+
+      var root = e.object.activity.render();
+
+      var box = root.find('.full-start-new__buttons');
+      if (!box.length) box = root.find('.full-start__buttons');
+      if (!box.length) return;
+
+      if (root.find('.view--turkish').length) return;
+
+      var btn = $(
+        '<div class="full-start__button selector view--turkish">' +
+          '<span>🇹🇷 Türkçe</span>' +
+        '</div>'
       );
 
-      if (!box) return;
-      if (box.querySelector('.turkish-test-button')) return;
+      btn.on('hover:enter', function () {
+        Lampa.Noty.show('Türkçe çalışıyor');
+      });
 
-      var btn = document.createElement('div');
-      btn.className = 'full-start__button selector turkish-test-button';
-      btn.innerHTML = '🇹🇷 Türkçe';
+      box.append(btn);
+    });
 
-      $(btn).on('hover:enter', function () {
-  Lampa.Noty.show('Türkçe çalışıyor');
-});
-      box.appendChild(btn);
-    }, 1000);
+    Lampa.Noty.show('🇹🇷 Türkçe plugin hazır');
   }
 
   if (window.appready) {
-    start();
+    startPlugin();
   } else {
     Lampa.Listener.follow('app', function (e) {
-      if (e.type === 'ready') start();
+      if (e.type === 'ready') {
+        startPlugin();
+      }
     });
   }
 })();
