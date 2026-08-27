@@ -1,45 +1,75 @@
 (function () {
   'use strict';
 
-  if (window.trTurkishBridge) return;
-  window.trTurkishBridge = true;
+  if (window.trTurkishFrance) return;
+  window.trTurkishFrance = true;
 
-  function addButton() {
-    var btn = document.createElement('div');
-    btn.className = 'full-start__button selector tr-bridge';
-    btn.innerHTML = '🇹🇷 Türkçe';
+  function openTurkish(movie) {
+    var title =
+      (movie && (
+        movie.original_title ||
+        movie.original_name ||
+        movie.title ||
+        movie.name
+      )) || '';
 
-    btn.addEventListener('click', function () {
-      Lampa.Noty.show('Türkçe kaynak aktif');
-    });
+    if (!title) {
+      Lampa.Noty.show('Название фильма не найдено');
+      return;
+    }
 
-    var timer = setInterval(function () {
-      var box = document.querySelector(
-        '.full-start-new__buttons,.full-start__buttons'
+    var url =
+      'https://www.justwatch.com/fr/recherche?q=' +
+      encodeURIComponent(title);
+
+    try {
+      if (Lampa.Utils && Lampa.Utils.openURL) {
+        Lampa.Utils.openURL(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (e) {
+      window.location.href = url;
+    }
+  }
+
+  function addButton(e) {
+    try {
+      var root = e.object.activity.render();
+
+      if (root.find('.turkish-france-button').length) return;
+
+      var box = root.find('.full-start-new__buttons');
+
+      if (!box.length) {
+        box = root.find('.full-start__buttons');
+      }
+
+      if (!box.length) return;
+
+      var button = $(
+        '<div class="full-start__button selector turkish-france-button">' +
+          '<span>🇹🇷 Türkçe</span>' +
+        '</div>'
       );
 
-      if (box && !box.querySelector('.tr-bridge')) {
-        box.appendChild(btn);
-        clearInterval(timer);
-      }
-    }, 500);
+      button.on('hover:enter', function () {
+        openTurkish(e.data.movie);
+      });
+
+      button.on('click', function () {
+        openTurkish(e.data.movie);
+      });
+
+      box.append(button);
+
+    } catch (err) {
+      console.log('[Türkçe France]', err);
+    }
   }
 
   function start() {
     Lampa.Listener.follow('full', function (e) {
-      if (e.type === 'complite') {
-        setTimeout(addButton, 300);
-      }
-    });
-
-    Lampa.Noty.show('🇹🇷 Türkçe plugin yüklendi');
-  }
-
-  if (window.appready) {
-    start();
-  } else {
-    Lampa.Listener.follow('app', function (e) {
-      if (e.type === 'ready') start();
-    });
-  }
-})();
+      if (e.type === 'complite' && e.data && e.data.movie) {
+        setTimeout(function () {
+          addButton
